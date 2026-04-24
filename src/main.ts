@@ -133,7 +133,7 @@ class KeyPress implements Hashable {
     return metaRepr + ctrlRepr + altRepr + shiftRepr + this.key;
   };
   public readonly kbd = (): HTMLElement => {
-    const result = document.createElement('kbd');
+    const result = activeDocument.createElement('kbd');
     result.addClass('setting-hotkey');
     result.setText(this.text());
     result.style.padding = '2px';
@@ -601,11 +601,11 @@ class RecordingModal extends Modal {
   public readonly onOpen = (): void => {
     this.renderContent(this.registerMachine.documentRepresentation());
 
-    document.addEventListener('keydown', this.handleKeyDown);
+    activeDocument.addEventListener('keydown', this.handleKeyDown);
   };
 
   public readonly onClose = (): void => {
-    document.removeEventListener('keydown', this.handleKeyDown);
+    activeDocument.removeEventListener('keydown', this.handleKeyDown);
     this.parent.display();
   };
 
@@ -647,17 +647,17 @@ class RecordingModal extends Modal {
     const additionalContent = inAdditionalContent || [];
     this.contentEl.empty();
 
-    const command = document.createElement('kbd');
+    const command = activeDocument.createElement('kbd');
     command.setText(this.commandId);
-    const header = document.createElement('h3');
+    const header = activeDocument.createElement('h3');
     header.setText('Adding keymap for command ');
     header.appendChild(command);
 
-    const introText = document.createElement('div');
+    const introText = activeDocument.createElement('div');
     introText.addClass('setting-hotkey');
     introText.style.overflow = 'auto';
     if (elements.length === 0) {
-      const prompt = document.createElement('span');
+      const prompt = activeDocument.createElement('span');
       prompt.setText('Waiting for keyboard input.');
       introText.appendChild(prompt);
     } else {
@@ -717,18 +717,18 @@ class RecordingModal extends Modal {
         ? ' will discard this input.'
         : ' will delete the previous input.';
 
-    const confirmText = document.createElement('p');
+    const confirmText = activeDocument.createElement('p');
     confirmText.append(
       'Did you mean literal ',
       pressLiteral,
       '?',
-      document.createElement('br'),
+      activeDocument.createElement('br'),
       enter,
       ' will add it to the sequence.',
-      document.createElement('br'),
+      activeDocument.createElement('br'),
       backspace,
       discardOrRemoves,
-      document.createElement('br'),
+      activeDocument.createElement('br'),
       ctrlAltEnter,
       ' will discard pending changes and complete.',
     );
@@ -746,7 +746,7 @@ class CommandModal extends Modal {
   }
 
   public onOpen(): void {
-    const title = document.createElement('h3');
+    const title = activeDocument.createElement('h3');
     title.setText('Leader Hotkeys: pick a command to create a keymap.');
     this.contentEl.appendChild(title);
     const setting = new Setting(this.contentEl);
@@ -901,7 +901,7 @@ class LeaderSettingsTab extends PluginSettingTab {
     setting.infoEl.remove();
     const settingControl = setting.settingEl.children[0];
 
-    const keySetter = document.createElement('div');
+    const keySetter = activeDocument.createElement('div');
     keySetter.addClass('setting-hotkey');
 
     const kbds = thisKeymap.sequence.map((press) => press.kbd());
@@ -913,7 +913,7 @@ class LeaderSettingsTab extends PluginSettingTab {
 
     settingControl.insertBefore(keySetter, settingControl.children[0]);
 
-    const appendText = document.createElement('span');
+    const appendText = activeDocument.createElement('span');
     appendText.addClass('leader-hotkeys-setting-append-text');
     appendText.setText('to');
     settingControl.insertBefore(appendText, settingControl.children[1]);
