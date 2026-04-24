@@ -647,11 +647,10 @@ class RecordingModal extends Modal {
     const additionalContent = inAdditionalContent || [];
     this.contentEl.empty();
 
-    const command = activeDocument.createElement('kbd');
-    command.setText(this.commandId);
-    const header = activeDocument.createElement('h3');
-    header.setText('Adding keymap for command ');
-    header.appendChild(command);
+    const headerSetting = new Setting(this.contentEl)
+      .setName('Adding keymap for command ')
+      .setHeading();
+    headerSetting.nameEl.createEl('kbd', { text: this.commandId });
 
     const introText = activeDocument.createElement('div');
     introText.addClass('setting-hotkey');
@@ -664,7 +663,6 @@ class RecordingModal extends Modal {
       introText.append(...elements);
     }
 
-    this.contentEl.appendChild(header);
     this.contentEl.appendChild(introText);
     if (additionalContent) {
       this.contentEl.append(...additionalContent);
@@ -746,9 +744,9 @@ class CommandModal extends Modal {
   }
 
   public onOpen(): void {
-    const title = activeDocument.createElement('h3');
-    title.setText('Leader Hotkeys: pick a command to create a keymap.');
-    this.contentEl.appendChild(title);
+    new Setting(this.contentEl)
+      .setName('Leader Hotkeys: pick a command to create a keymap.')
+      .setHeading();
     const setting = new Setting(this.contentEl);
 
     setting.addDropdown((dropdown) => {
@@ -808,9 +806,11 @@ class LeaderSettingsTab extends PluginSettingTab {
 
     const containerEl = this.containerEl;
     containerEl.empty();
-    containerEl.createEl('h2', { text: 'Leader Hotkeys Plugin - Settings' });
+    new Setting(containerEl)
+      .setName('Leader Hotkeys Plugin - Settings')
+      .setHeading();
 
-    containerEl.createEl('h3', { text: 'Existing Hotkeys' });
+    new Setting(containerEl).setName('Existing Hotkeys').setHeading();
     for (let i = 0; i < this.currentKeymaps().length; i++) {
       this.displayExisting(i);
     }
