@@ -135,11 +135,8 @@ class KeyPress implements Hashable {
   public readonly kbd = (): HTMLElement => {
     const result = activeDocument.createElement('kbd');
     result.addClass('setting-hotkey');
+    result.addClass('leader-hotkeys-kbd');
     result.setText(this.text());
-    result.style.padding = '2px';
-    result.style.margin = '5px';
-    result.style.border = '1px solid rgba(255,255,255,.25)';
-    result.style.borderRadius = '3px';
     return result;
   };
   public readonly asHash = (): string => {
@@ -654,7 +651,7 @@ class RecordingModal extends Modal {
 
     const introText = activeDocument.createElement('div');
     introText.addClass('setting-hotkey');
-    introText.style.overflow = 'auto';
+    introText.addClass('leader-hotkeys-scroll');
     if (elements.length === 0) {
       const prompt = activeDocument.createElement('span');
       prompt.setText('Waiting for keyboard input.');
@@ -699,16 +696,16 @@ class RecordingModal extends Modal {
     // Inplace mutation :(
     const elements = this.registerMachine.documentRepresentation();
     const lastElement = elements[elements.length - 1];
-    lastElement.style.opacity = '0.5';
+    lastElement.addClass('leader-hotkeys-pending');
 
     const enter = KeyPress.just('Enter').kbd();
-    enter.style.borderColor = 'green';
+    enter.addClass('leader-hotkeys-kbd-confirm');
     const backspace = KeyPress.just('Backspace').kbd();
-    backspace.style.borderColor = 'red';
+    backspace.addClass('leader-hotkeys-kbd-cancel');
 
     const ctrlAltEnter = KeyPress.ctrlAlt('Enter').kbd();
     const pressLiteral = lastElement.cloneNode(true) as HTMLElement;
-    pressLiteral.style.opacity = '1';
+    pressLiteral.removeClass('leader-hotkeys-pending');
 
     const discardOrRemoves =
               mappingState === RecordingState.PendingAddition
