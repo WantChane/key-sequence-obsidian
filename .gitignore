@@ -10,9 +10,6 @@ package-lock.json
 main.js
 *.js.map
 
-# yarn
-yarn-error.log
-
 # Obsidian
 
 data.json
