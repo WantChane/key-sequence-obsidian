@@ -751,7 +751,7 @@ class CommandModal extends Modal {
 
   public onOpen(): void {
     new Setting(this.contentEl)
-      .setName('Leader Hotkeys: pick a command to create a keymap.')
+      .setName('Pick a command to create a keymap')
       .setHeading();
     const setting = new Setting(this.contentEl);
 
@@ -812,17 +812,14 @@ class LeaderSettingsTab extends PluginSettingTab {
 
     const containerEl = this.containerEl;
     containerEl.empty();
-    new Setting(containerEl)
-      .setName('Leader Hotkeys Plugin - Settings')
-      .setHeading();
 
-    new Setting(containerEl).setName('Existing Hotkeys').setHeading();
+    new Setting(containerEl).setName('Existing hotkeys').setHeading();
     for (let i = 0; i < this.currentKeymaps().length; i++) {
       this.displayExisting(i);
     }
 
     new Setting(containerEl).addButton((button) => {
-      button.setButtonText('New Keymap').onClick(() => {
+      button.setButtonText('New keymap').onClick(() => {
         new CommandModal(this).open();
       });
     });
@@ -921,7 +918,7 @@ class LeaderSettingsTab extends PluginSettingTab {
 
     const appendText = activeDocument.createElement('span');
     appendText.addClass('leader-hotkeys-setting-append-text');
-    appendText.setText('to');
+    appendText.setText('To');
     settingControl.insertBefore(appendText, settingControl.children[1]);
   }
 
