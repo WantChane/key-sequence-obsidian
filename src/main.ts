@@ -174,7 +174,7 @@ class KeyMap implements Iterable<KeyPress> {
 
     const sequence = keyMapLike.sequence || [];
 
-    const presses = sequence.map(KeyPress.of);
+    const presses = sequence.map((p) => KeyPress.of(p));
     const command = keyMapLike.commandID;
     return new KeyMap(command, presses);
   }
