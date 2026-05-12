@@ -207,7 +207,7 @@ interface KeyBinding {
 // endregion
 
 // region Matching of existing keymaps
-interface HashIter extends Iterable<Hashable> {}
+type HashIter = Iterable<Hashable>;
 
 class TrieNode<T> {
   public children = new Map<string, TrieNode<T>>();
