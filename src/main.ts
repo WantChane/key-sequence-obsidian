@@ -19,6 +19,15 @@ interface CommandMap {
   [key: string]: ObsidianCommand;
 }
 
+declare module 'obsidian' {
+  interface App {
+    commands: {
+      commands: CommandMap;
+      executeCommandById(id: string): void;
+    };
+  }
+}
+
 interface CustomCommand {
   key: string;
   modifiers: string[];
@@ -949,9 +958,7 @@ export default class LeaderHotkeys extends Plugin {
 
   public invokeCommand(commandID: string): void {
     if (commandID) {
-      // todo remove any typing
-      const app = this.app as any;
-      app.commands.executeCommandById(commandID);
+      this.app.commands.executeCommandById(commandID);
     }
   }
 
@@ -996,21 +1003,16 @@ export default class LeaderHotkeys extends Plugin {
   private readonly loadSavedSettings = async (): Promise<void> => {
     writeConsole('Loading previously saved settings.');
 
-    const savedSettings = (await this.loadData()) || {};
+    const raw = (await this.loadData()) as Partial<KeyBinding> | null;
     try {
-      savedSettings.hotkeys = (savedSettings.hotkeys || []).map(KeyMap.of);
-      this.settings = savedSettings;
+      const hotkeys = (raw?.hotkeys ?? []).map((km) => KeyMap.of(km));
+      this.settings = { hotkeys };
       writeConsole('Loaded previous settings.');
-    } catch (err) {
+    } catch {
       writeConsole('A failure occured while parsing the saved settings.');
       createNotice(
         'A failure occured while loading the saved settings. Fallbacking to defaults.',
       );
-      // todo : Retrocompatibility?
-      //  Harder than i thought since LeaderKey isn't saved here.
-      //  Would need to keep the old command ,
-      //  lookup the binding and convert it to the new one.
-
       this.settings = defaultSettings;
     }
     this.matchHandler = new MatchHandler(this);
@@ -1019,10 +1021,7 @@ export default class LeaderHotkeys extends Plugin {
 
 // region consts and utils
 const listCommands = (app: App): ObsidianCommand[] => {
-  // todo remove any type
-  const anyApp = app as any;
-  const commands = anyApp.commands.commands as CommandMap;
-  return Object.values(commands);
+  return Object.values(app.commands.commands);
 };
 const interpretMatch = (bestMatch: Optional<TrieNode<KeyMap>>): MatchKind => {
   if (!bestMatch) {
