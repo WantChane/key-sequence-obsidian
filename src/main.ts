@@ -436,14 +436,11 @@ class MatchHandler {
 
   public readonly handleKeyDown = (event: KeyboardEvent): void => {
     const keypress = KeyPress.fromEvent(event);
-    console.debug( keypress );
     const machineState = this.machine.advance(keypress);
-    writeConsole(
-      `An keypress resulted in a ${MatchState[machineState]} state.`,
-    );
 
     if (this.machine.stateKind() !== MatchStateKind.Initial) {
       event.preventDefault();
+      event.stopPropagation();
 
       if (machineState === MatchState.SuccessMatch) {
         const keymap = this.machine.fullMatch();
@@ -977,13 +974,13 @@ export default class LeaderHotkeys extends Plugin {
   private readonly registerEventsAndCallbacks = async (): Promise<void> => {
     writeConsole('Registering necessary event callbacks');
 
-    const workspaceContainer = this.app.workspace.containerEl;
     this.registerDomEvent(
-      workspaceContainer,
+      document,
       'keydown',
       this.matchHandler.handleKeyDown,
+      { capture: true },
     );
-    writeConsole('Registered workspace "keydown" event callbacks.');
+    writeConsole('Registered capture-phase "keydown" listener on document.');
 
     const openModalCommand = {
       id: 'register-modal',
