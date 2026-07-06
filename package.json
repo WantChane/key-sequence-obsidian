@@ -1,6 +1,6 @@
 {
   "name": "key-sequence-obsidian",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Assign multi-key sequences to any command.",
   "main": "main.js",
   "type": "module",
