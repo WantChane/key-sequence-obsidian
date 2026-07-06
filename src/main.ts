@@ -134,13 +134,18 @@ class KeyPress implements Hashable {
     this.meta = meta;
   }
 
+  private static readonly keyLabels: Record<string, string> = {
+    ' ': 'Space',
+  };
+
   public readonly text = (): string => {
     const metaRepr = this.meta ? '⌘ + ' : '';
     const altRepr = this.alt ? 'Alt + ' : '';
     const ctrlRepr = this.ctrl ? 'Ctrl + ' : '';
     const shiftRepr = this.shift ? '⇧ + ' : '';
 
-    return metaRepr + ctrlRepr + altRepr + shiftRepr + this.key;
+    const keyLabel = KeyPress.keyLabels[this.key] ?? this.key;
+    return metaRepr + ctrlRepr + altRepr + shiftRepr + keyLabel;
   };
   public readonly kbd = (): HTMLElement => {
     const result = activeDocument.createElement('kbd');
