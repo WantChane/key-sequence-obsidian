@@ -384,7 +384,7 @@ class MatchMachine implements StateMachine<KeyPress, MatchState> {
         this.currentState = wasAlreadySearching
           ? MatchState.SuccessMatch
           : // Very sus to reach success state at first try.
-            MatchState.SuccessMatch;
+          MatchState.SuccessMatch;
         break;
     }
 
@@ -444,6 +444,10 @@ class MatchHandler {
 
   public readonly handleKeyDown = (event: KeyboardEvent): void => {
     if (!this.enabled) {
+      return;
+    }
+
+    if (isInputFocused()) {
       return;
     }
 
@@ -1094,6 +1098,23 @@ const interpretMatch = (bestMatch: Optional<TrieNode<KeyMap>>): MatchKind => {
   }
   return MatchKind.PartialMatch;
 };
+
+const isInputFocused = (): boolean => {
+  const target = activeDocument.activeElement;
+  if (!target) return false;
+
+  const tag = target.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+    return true;
+  }
+
+  if ((target as HTMLElement).isContentEditable) {
+    return true;
+  }
+
+  return false;
+};
+
 const writeConsole = (message: string): void => {
   console.debug(` Key Sequence: ${message}`);
 };
