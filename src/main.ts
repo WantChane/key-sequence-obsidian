@@ -1,5 +1,6 @@
 import {
   App,
+  MarkdownView,
   Modal,
   Notice,
   Plugin,
@@ -944,6 +945,7 @@ export default class LeaderHotkeys extends Plugin {
   public settings: KeyBinding;
   private settingsTab: LeaderSettingsTab;
   private matchHandler: MatchHandler;
+  private vimMode: string = 'normal';
 
   public async onload(): Promise<void> {
     writeConsole('Started Loading.');
@@ -955,12 +957,50 @@ export default class LeaderHotkeys extends Plugin {
     this.addSettingTab(this.settingsTab);
     writeConsole('Registered Setting Tab.');
 
+    this.registerVimModeMonitor();
+    writeConsole('Registered Vim mode monitor.');
+
     writeConsole('Finished Loading.');
   }
 
   public onunload(): void {
     writeConsole('Unloading plugin.');
   }
+
+  private registerVimModeMonitor(): void {
+    const updateVimListener = () => {
+      const view = this.app.workspace.getActiveViewOfType(MarkdownView);
+      if (!view) return;
+
+      const cm = this.getCodeMirror(view);
+      if (!cm) return;
+
+      cm.off('vim-mode-change', this.onVimModeChanged);
+      cm.on('vim-mode-change', this.onVimModeChanged);
+    };
+
+    this.app.workspace.on('active-leaf-change', updateVimListener);
+    // Also run immediately for the already-active leaf.
+    updateVimListener();
+  }
+
+  private getCodeMirror(view: any): any {
+    return view?.sourceMode?.cmEditor?.cm?.cm;
+  }
+
+  private readonly onVimModeChanged = (modeObj: any): void => {
+    if (!modeObj || modeObj.mode === undefined) return;
+
+    const previousMode = this.vimMode;
+    this.vimMode = modeObj.mode;
+
+    if (this.vimMode === 'normal') {
+      this.matchHandler.setEnabled(true);
+    } else if (previousMode === 'normal') {
+      // Transitioned away from normal → disable hotkeys.
+      this.matchHandler.setEnabled(false);
+    }
+  };
 
   public invokeCommand(commandID: string): void {
     if (commandID) {
