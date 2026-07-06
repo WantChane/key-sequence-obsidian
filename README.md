@@ -35,17 +35,12 @@ Open Register Modal** command in the command palette.
 ### Managing keymaps
 
 Each configured keymap shows:
+
 - The key sequence on the left (click to re-record)
 - A command dropdown to change the target command
 - A delete button to remove the keymap
 
 ## Installation
-
-### From Obsidian Community Plugins
-
-1. Settings → Community plugins → Browse
-2. Search "Key Sequence"
-3. Install and enable
 
 ### Manual
 
