@@ -1,9 +1,9 @@
 {
-  "id": "key-sequence-obsidian",
+  "id": "key-sequence",
   "name": "Key Sequence",
   "author": "WantChane",
   "description": "Assign multi-key sequences to any command.",
   "isDesktopOnly": false,
-  "version": "1.0.0",
+  "version": "1.1.1",
   "minAppVersion": "1.1.0"
 }
