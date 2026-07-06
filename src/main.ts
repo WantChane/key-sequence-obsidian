@@ -336,9 +336,6 @@ class MatchMachine implements StateMachine<KeyPress, MatchState> {
   }
 
   public advance = (keypress: KeyPress): MatchState => {
-
-
-
     const macroState = this.stateKind();
     const wasAlreadySearching = macroState === MatchStateKind.Flow;
     if (macroState === MatchStateKind.Terminal) {
@@ -349,9 +346,13 @@ class MatchMachine implements StateMachine<KeyPress, MatchState> {
       return this.advance(keypress);
     }
     if (keypress.kind() === PressKind.ModifierOnly) {
-      this.currentState = [MatchState.EmptyMatch , MatchState.InvalidMatch , MatchState.SuccessMatch].includes( this.currentState)
-                          ? MatchState.EmptyMatch
-                          : MatchState.RetainedMatch;
+      this.currentState = [
+        MatchState.EmptyMatch,
+        MatchState.InvalidMatch,
+        MatchState.SuccessMatch,
+      ].includes(this.currentState)
+        ? MatchState.EmptyMatch
+        : MatchState.RetainedMatch;
 
       return this.currentState;
     }
@@ -363,7 +364,7 @@ class MatchMachine implements StateMachine<KeyPress, MatchState> {
 
     switch (matchKind) {
       case MatchKind.NoMatch:
-        this.currentSequence = []
+        this.currentSequence = [];
         this.currentState = wasAlreadySearching
           ? MatchState.InvalidMatch
           : MatchState.EmptyMatch;
@@ -377,9 +378,8 @@ class MatchMachine implements StateMachine<KeyPress, MatchState> {
         this.currentState = wasAlreadySearching
           ? MatchState.SuccessMatch
           : // Very sus to reach success state at first try.
-            MatchState.SuccessMatch;
+          MatchState.SuccessMatch;
         break;
-
     }
 
     return this.currentState;
@@ -509,15 +509,15 @@ class RecordingMachine implements StateMachine<KeyPress, RecordingState> {
       return this.currentState;
     }
 
-    if ( this.currentState === RecordingState.FinishedMapping) {
+    if (this.currentState === RecordingState.FinishedMapping) {
       // Explicitly state that it can be re-started without loss.
       this.currentState = RecordingState.WaitingInput;
       return this.advance(keyPress);
     }
 
     if (
-        this.currentState === RecordingState.PendingAddition ||
-        this.currentState === RecordingState.PendingDeletion
+      this.currentState === RecordingState.PendingAddition ||
+      this.currentState === RecordingState.PendingDeletion
     ) {
       const previousLiteral = this.currentSequence.pop();
       const action = this.interpretAction(keyPress);
@@ -573,13 +573,13 @@ class RecordingMachine implements StateMachine<KeyPress, RecordingState> {
     if (keypress.key === 'Enter') {
       return PendingChoice.KeepLiteral;
     } else if (
-        keypress.key === 'Backspace' &&
-        this.currentState === RecordingState.PendingDeletion
+      keypress.key === 'Backspace' &&
+      this.currentState === RecordingState.PendingDeletion
     ) {
       return PendingChoice.DeletePrevious;
     } else if (
-        keypress.key === 'Backspace' &&
-        this.currentState === RecordingState.PendingAddition
+      keypress.key === 'Backspace' &&
+      this.currentState === RecordingState.PendingAddition
     ) {
       return PendingChoice.DiscardLiteral;
     }
@@ -714,7 +714,7 @@ class RecordingModal extends Modal {
     pressLiteral.removeClass('leader-hotkeys-pending');
 
     const discardOrRemoves =
-              mappingState === RecordingState.PendingAddition
+      mappingState === RecordingState.PendingAddition
         ? ' will discard this input.'
         : ' will delete the previous input.';
 
