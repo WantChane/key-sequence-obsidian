@@ -1,7 +1,7 @@
 {
-  "name": "leader-hotkeys-obsidian",
-  "version": "0.3.1",
-  "description": "Add leader hotkey support to any command (like tmux or vim).",
+  "name": "key-sequence-obsidian",
+  "version": "1.0.0",
+  "description": "Assign multi-key sequences to any command.",
   "main": "main.js",
   "type": "module",
   "scripts": {

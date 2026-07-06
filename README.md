@@ -1,56 +1,66 @@
-# Leader Hotkeys for Obsidian
+# Key Sequence
 
-**Note:** The 0.2.0 release will require reconfiguring your hotkeys. The configuration is now greatly revamped and significantly more useful. Sorry for the inconvenience.
+Assign multi-key sequences to any Obsidian command, including those from other
+plugins.
 
-Use a leader key when assigning a hotkey to a command. Works with any command
-in Obsidian, even those added by other plugins!
+## How it works
 
-The leader key is pressed before the assigned hotkey, similar to hotkeys in
-tmux or Vim.
+Instead of a single chord, you press a **sequence of keys** to trigger a
+command. For example, press <kbd>Ctrl</kbd>+<kbd>b</kbd> then
+<kbd>h</kbd> to focus the pane to the left.
 
-By default there is no leader key defined. I personally use
-<kbd>ctrl</kbd>+<kbd>b</kbd>, however you can configure any leader key in the
-Obsidian Hotkeys settings page, just like any other hotkey.
+No key sequences are pre-configured. You define your own.
 
-By default the following commands are configured:
+## Vim mode
 
-| Leader Hotkey                  | Action                     |
-| ------------------------------ | -------------------------- |
-| <kbd>leader</kbd> <kbd>j</kbd> | Focus on pane below        |
-| <kbd>leader</kbd> <kbd>k</kbd> | Focus on pane above        |
-| <kbd>leader</kbd> <kbd>h</kbd> | Focus on pane to the left  |
-| <kbd>leader</kbd> <kbd>l</kbd> | Focus on pane to the right |
+When Obsidian's Vim mode is active, key sequences are **disabled** in insert,
+visual, and replace modes — they only work from normal mode. This prevents
+key sequences from interfering with typing.
 
-## How to Install
+## Usage
 
-### From within Obsidian
+### Adding a keymap
 
-From Obsidian v0.9.8+, you can activate this plugin within Obsidian by doing the following:
+1. Open Settings → **Key Sequence**
+2. Click **New keymap**
+3. Select a command from the dropdown
+4. Press your key sequence (e.g. <kbd>Ctrl</kbd>+<kbd>b</kbd> then <kbd>h</kbd>)
+5. Press <kbd>Enter</kbd> to confirm each key, or
+   <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Enter</kbd> to finish
+6. Click **Save**
 
-- Open Settings > Third-party plugin
-- Make sure Safe mode is **off**
-- Click Browse community plugins
-- Search for "Leader Hotkeys"
-- Click Install
-- Once installed, close the community plugins window and activate the newly installed plugin
+You can also open the recording modal from anywhere via the **Key Sequence:
+Open Register Modal** command in the command palette.
 
-#### Updates
+### Managing keymaps
 
-You can follow the same procedure to update the plugin
+Each configured keymap shows:
+- The key sequence on the left (click to re-record)
+- A command dropdown to change the target command
+- A delete button to remove the keymap
 
-(Thanks to @deathau for the borrowed installation instructions.)
+## Installation
 
-## Pricing
+### From Obsidian Community Plugins
 
-This plugin is provided to everyone for free, however if you would like to
-say thanks or help support continued development, feel free to send a little
-my way through one of the following methods:
+1. Settings → Community plugins → Browse
+2. Search "Key Sequence"
+3. Install and enable
 
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/tgrosinger?style=social)](https://github.com/sponsors/tgrosinger)
-[![Paypal](https://img.shields.io/badge/paypal-tgrosinger-yellow?style=social&logo=paypal)](https://paypal.me/tgrosinger)
-[<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="BuyMeACoffee" width="100">](https://www.buymeacoffee.com/tgrosinger)
+### Manual
+
+Copy `main.js`, `manifest.json`, and `styles.css` to
+`<vault>/.obsidian/plugins/key-sequence-obsidian/`.
 
 ## Notes
 
-This is experimental and may have instability. It is possible that there are
-bugs which may delete data in the current note. Please make backups!
+This plugin captures keydown events at the document level to match key
+sequences. Conflicts with other hotkeys are possible — if a sequence prefix
+matches another binding, the key sequence takes priority while a partial
+match is in progress.
+
+## Acknowledgments
+
+Vim mode integration adapted from
+[vim-im-select-obsidian](https://github.com/ALONELUR/vim-im-select-obsidian)
+by ALONELUR (MIT License).

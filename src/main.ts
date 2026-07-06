@@ -145,7 +145,7 @@ class KeyPress implements Hashable {
   public readonly kbd = (): HTMLElement => {
     const result = activeDocument.createElement('kbd');
     result.addClass('setting-hotkey');
-    result.addClass('leader-hotkeys-kbd');
+    result.addClass('key-sequence-kbd');
     result.setText(this.text());
     return result;
   };
@@ -428,10 +428,10 @@ class MatchMachine implements StateMachine<KeyPress, MatchState> {
 class MatchHandler {
   private trie: Trie<KeyMap>;
   private machine: MatchMachine;
-  private readonly parent: LeaderHotkeys;
+  private readonly parent: KeySequence;
   private enabled: boolean;
 
-  public constructor(parent: LeaderHotkeys) {
+  public constructor(parent: KeySequence) {
     this.parent = parent;
     this.enabled = true;
     this.setKeymap(parent.settings.hotkeys);
@@ -599,12 +599,12 @@ class RecordingMachine implements StateMachine<KeyPress, RecordingState> {
 }
 
 class RecordingModal extends Modal {
-  private readonly parent: LeaderSettingsTab;
+  private readonly parent: KeySequenceSettingTab;
   private readonly registerMachine: RecordingMachine;
   private readonly commandId: string;
   private currentSequence: KeyPress[];
 
-  constructor(parent: LeaderSettingsTab, commandId: string) {
+  constructor(parent: KeySequenceSettingTab, commandId: string) {
     super(parent.app);
     this.parent = parent;
     this.commandId = commandId;
@@ -670,7 +670,7 @@ class RecordingModal extends Modal {
 
     const introText = activeDocument.createElement('div');
     introText.addClass('setting-hotkey');
-    introText.addClass('leader-hotkeys-scroll');
+    introText.addClass('key-sequence-scroll');
     if (elements.length === 0) {
       const prompt = activeDocument.createElement('span');
       prompt.setText('Waiting for keyboard input.');
@@ -715,16 +715,16 @@ class RecordingModal extends Modal {
     // Inplace mutation :(
     const elements = this.registerMachine.documentRepresentation();
     const lastElement = elements[elements.length - 1];
-    lastElement.addClass('leader-hotkeys-pending');
+    lastElement.addClass('key-sequence-pending');
 
     const enter = KeyPress.just('Enter').kbd();
-    enter.addClass('leader-hotkeys-kbd-confirm');
+    enter.addClass('key-sequence-kbd-confirm');
     const backspace = KeyPress.just('Backspace').kbd();
-    backspace.addClass('leader-hotkeys-kbd-cancel');
+    backspace.addClass('key-sequence-kbd-cancel');
 
     const ctrlAltEnter = KeyPress.ctrlAlt('Enter').kbd();
     const pressLiteral = lastElement.cloneNode(true) as HTMLElement;
-    pressLiteral.removeClass('leader-hotkeys-pending');
+    pressLiteral.removeClass('key-sequence-pending');
 
     const discardOrRemoves =
       mappingState === RecordingState.PendingAddition
@@ -751,10 +751,10 @@ class RecordingModal extends Modal {
 }
 
 class CommandModal extends Modal {
-  private readonly parent: LeaderSettingsTab;
+  private readonly parent: KeySequenceSettingTab;
   private commandId: string;
 
-  constructor(parent: LeaderSettingsTab) {
+  constructor(parent: KeySequenceSettingTab) {
     super(parent.app);
     this.parent = parent;
   }
@@ -766,7 +766,7 @@ class CommandModal extends Modal {
     const setting = new Setting(this.contentEl);
 
     setting.addDropdown((dropdown) => {
-      dropdown.selectEl.addClass('leader-hotkeys-command');
+      dropdown.selectEl.addClass('key-sequence-command');
 
       for (const command of this.parent.obsidianCommands()) {
         dropdown.addOption(command.id, command.name);
@@ -807,11 +807,11 @@ class CommandModal extends Modal {
 
 // endregion
 
-class LeaderSettingsTab extends PluginSettingTab {
+class KeySequenceSettingTab extends PluginSettingTab {
   public commands: ObsidianCommand[];
-  public readonly plugin: LeaderHotkeys;
+  public readonly plugin: KeySequence;
 
-  constructor(plugin: LeaderHotkeys) {
+  constructor(plugin: KeySequence) {
     super(plugin.app, plugin);
     this.plugin = plugin;
     this.app = plugin.app;
@@ -898,13 +898,13 @@ class LeaderSettingsTab extends PluginSettingTab {
       });
 
       dropdown.setValue(thisKeymap.commandID);
-      dropdown.selectEl.addClass('leader-hotkeys-command');
+      dropdown.selectEl.addClass('key-sequence-command');
     });
     setting.addExtraButton((button) => {
       button
         .setIcon('cross')
         .setTooltip('Delete shortcut')
-        .extraSettingsEl.addClass('leader-hotkeys-delete');
+        .extraSettingsEl.addClass('key-sequence-delete');
 
       button.onClick(() => {
         this.removeKeymap(positionId);
@@ -927,7 +927,7 @@ class LeaderSettingsTab extends PluginSettingTab {
     settingControl.insertBefore(keySetter, settingControl.children[0]);
 
     const appendText = activeDocument.createElement('span');
-    appendText.addClass('leader-hotkeys-setting-append-text');
+    appendText.addClass('key-sequence-setting-append-text');
     appendText.setText('To');
     settingControl.insertBefore(appendText, settingControl.children[1]);
   }
@@ -941,9 +941,9 @@ class LeaderSettingsTab extends PluginSettingTab {
   }
 }
 
-export default class LeaderHotkeys extends Plugin {
+export default class KeySequence extends Plugin {
   public settings: KeyBinding;
-  private settingsTab: LeaderSettingsTab;
+  private settingsTab: KeySequenceSettingTab;
   private matchHandler: MatchHandler;
   private vimMode: string = 'normal';
 
@@ -953,7 +953,7 @@ export default class LeaderHotkeys extends Plugin {
     await this.loadSavedSettings();
     await this.registerEventsAndCallbacks();
 
-    this.settingsTab = new LeaderSettingsTab(this);
+    this.settingsTab = new KeySequenceSettingTab(this);
     this.addSettingTab(this.settingsTab);
     writeConsole('Registered Setting Tab.');
 
@@ -967,6 +967,12 @@ export default class LeaderHotkeys extends Plugin {
     writeConsole('Unloading plugin.');
   }
 
+  // region Vim mode integration
+  //
+  // The vim-mode-change listener pattern and getCodeMirror accessor below
+  // are adapted from vim-im-select-obsidian by ALONELUR (MIT License).
+  // https://github.com/ALONELUR/vim-im-select-obsidian
+  //
   private registerVimModeMonitor(): void {
     const updateVimListener = () => {
       const view = this.app.workspace.getActiveViewOfType(MarkdownView);
@@ -1001,6 +1007,7 @@ export default class LeaderHotkeys extends Plugin {
       this.matchHandler.setEnabled(false);
     }
   };
+  // endregion
 
   public invokeCommand(commandID: string): void {
     if (commandID) {
@@ -1083,9 +1090,9 @@ const interpretMatch = (bestMatch: Optional<TrieNode<KeyMap>>): MatchKind => {
   return MatchKind.PartialMatch;
 };
 const writeConsole = (message: string): void => {
-  console.debug(` Leader Hotkeys: ${message}`);
+  console.debug(` Key Sequence: ${message}`);
 };
 const createNotice = (message: string): void => {
-  new Notice('Leader Hotkeys: ' + message);
+  new Notice('Key Sequence: ' + message);
 };
 // endregion
