@@ -379,7 +379,7 @@ class MatchMachine implements StateMachine<KeyPress, MatchState> {
         this.currentState = wasAlreadySearching
           ? MatchState.SuccessMatch
           : // Very sus to reach success state at first try.
-          MatchState.SuccessMatch;
+            MatchState.SuccessMatch;
         break;
     }
 
@@ -1063,7 +1063,7 @@ export default class LeaderHotkeys extends Plugin {
       createNotice(
         'A failure occured while loading the saved settings. Fallbacking to defaults.',
       );
-      this.settings = defaultSettings;
+      this.settings = { hotkeys: [] };
     }
     this.matchHandler = new MatchHandler(this);
   };
@@ -1081,32 +1081,6 @@ const interpretMatch = (bestMatch: Optional<TrieNode<KeyMap>>): MatchKind => {
     return MatchKind.FullMatch;
   }
   return MatchKind.PartialMatch;
-};
-const defaultHotkeys: KeyMap[] = [
-  new KeyMap('editor:focus-left', [KeyPress.ctrl('b'), KeyPress.just('h')]),
-  new KeyMap('editor:focus-right', [KeyPress.ctrl('b'), KeyPress.just('l')]),
-  new KeyMap('editor:focus-top', [KeyPress.ctrl('b'), KeyPress.just('k')]),
-  new KeyMap('editor:focus-bottom', [KeyPress.ctrl('b'), KeyPress.just('j')]),
-  new KeyMap('command-palette:open', [
-    KeyPress.ctrl('q'),
-    KeyPress.just('1'),
-    KeyPress.just('2'),
-    KeyPress.just('2'),
-  ]),
-  new KeyMap('command-palette:open', [
-    KeyPress.ctrl(' '),
-    KeyPress.just('p'),
-    KeyPress.just('a'),
-    KeyPress.just('l'),
-    KeyPress.just('l'),
-    KeyPress.just('e'),
-    KeyPress.just('t'),
-    KeyPress.just('t'),
-    KeyPress.just('e'),
-  ]),
-];
-const defaultSettings: KeyBinding = {
-  hotkeys: defaultHotkeys,
 };
 const writeConsole = (message: string): void => {
   console.debug(` Leader Hotkeys: ${message}`);
