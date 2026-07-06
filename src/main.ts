@@ -428,13 +428,19 @@ class MatchHandler {
   private trie: Trie<KeyMap>;
   private machine: MatchMachine;
   private readonly parent: LeaderHotkeys;
+  private enabled: boolean;
 
   public constructor(parent: LeaderHotkeys) {
     this.parent = parent;
+    this.enabled = true;
     this.setKeymap(parent.settings.hotkeys);
   }
 
   public readonly handleKeyDown = (event: KeyboardEvent): void => {
+    if (!this.enabled) {
+      return;
+    }
+
     const keypress = KeyPress.fromEvent(event);
     const machineState = this.machine.advance(keypress);
 
@@ -448,6 +454,10 @@ class MatchHandler {
       }
     }
   };
+
+  public setEnabled(enabled: boolean): void {
+    this.enabled = enabled;
+  }
 
   public emit(keymap: Optional<KeyMap>): void {
     if (keymap) {
@@ -602,6 +612,7 @@ class RecordingModal extends Modal {
   }
 
   public readonly onOpen = (): void => {
+    this.parent.plugin.setMatchHandlerEnabled(false);
     this.renderContent(this.registerMachine.documentRepresentation());
 
     activeDocument.addEventListener('keydown', this.handleKeyDown);
@@ -609,6 +620,7 @@ class RecordingModal extends Modal {
 
   public readonly onClose = (): void => {
     activeDocument.removeEventListener('keydown', this.handleKeyDown);
+    this.parent.plugin.setMatchHandlerEnabled(true);
     this.parent.display();
   };
 
@@ -796,7 +808,7 @@ class CommandModal extends Modal {
 
 class LeaderSettingsTab extends PluginSettingTab {
   public commands: ObsidianCommand[];
-  private readonly plugin: LeaderHotkeys;
+  public readonly plugin: LeaderHotkeys;
 
   constructor(plugin: LeaderHotkeys) {
     super(plugin.app, plugin);
@@ -958,6 +970,10 @@ export default class LeaderHotkeys extends Plugin {
 
   public findMatchingKeymaps(presses: KeyPress[]): KeyMap[] {
     return this.matchHandler.findMatchingKeymaps(presses);
+  }
+
+  public setMatchHandlerEnabled(enabled: boolean): void {
+    this.matchHandler.setEnabled(enabled);
   }
 
   public persistKeymaps(newKeymaps: KeyMap[]): void {
