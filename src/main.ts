@@ -1108,7 +1108,8 @@ const isInputFocused = (): boolean => {
     return true;
   }
 
-  if ((target as HTMLElement).isContentEditable) {
+  const el = target as HTMLElement;
+  if (el.isContentEditable && !el.closest('.cm-editor')) {
     return true;
   }
 
