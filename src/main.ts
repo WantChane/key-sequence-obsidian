@@ -1,6 +1,5 @@
 import {
   App,
-  MarkdownView,
   Modal,
   Notice,
   Plugin,
@@ -56,6 +55,10 @@ interface Hashable {
 }
 
 class KeyPress implements Hashable {
+  private static readonly keyLabels: Record<string, string> = {
+    ' ': 'Space',
+  };
+
   // region static constructors
   public static ctrl(key: string): KeyPress {
     return new KeyPress(key, false, false, true, false);
@@ -133,10 +136,6 @@ class KeyPress implements Hashable {
     this.ctrl = ctrl;
     this.meta = meta;
   }
-
-  private static readonly keyLabels: Record<string, string> = {
-    ' ': 'Space',
-  };
 
   public readonly text = (): string => {
     const metaRepr = this.meta ? '⌘ + ' : '';
@@ -954,7 +953,6 @@ export default class KeySequence extends Plugin {
   public settings: KeyBinding;
   private settingsTab: KeySequenceSettingTab;
   private matchHandler: MatchHandler;
-  private vimMode: string = 'normal';
 
   public async onload(): Promise<void> {
     writeConsole('Started Loading.');
@@ -966,57 +964,12 @@ export default class KeySequence extends Plugin {
     this.addSettingTab(this.settingsTab);
     writeConsole('Registered Setting Tab.');
 
-    this.registerVimModeMonitor();
-    writeConsole('Registered Vim mode monitor.');
-
     writeConsole('Finished Loading.');
   }
 
   public onunload(): void {
     writeConsole('Unloading plugin.');
   }
-
-  // region Vim mode integration
-  //
-  // The vim-mode-change listener pattern and getCodeMirror accessor below
-  // are adapted from vim-im-select-obsidian by ALONELUR (MIT License).
-  // https://github.com/ALONELUR/vim-im-select-obsidian
-  //
-  private registerVimModeMonitor(): void {
-    const updateVimListener = () => {
-      const view = this.app.workspace.getActiveViewOfType(MarkdownView);
-      if (!view) return;
-
-      const cm = this.getCodeMirror(view);
-      if (!cm) return;
-
-      cm.off('vim-mode-change', this.onVimModeChanged);
-      cm.on('vim-mode-change', this.onVimModeChanged);
-    };
-
-    this.app.workspace.on('active-leaf-change', updateVimListener);
-    // Also run immediately for the already-active leaf.
-    updateVimListener();
-  }
-
-  private getCodeMirror(view: any): any {
-    return view?.sourceMode?.cmEditor?.cm?.cm;
-  }
-
-  private readonly onVimModeChanged = (modeObj: any): void => {
-    if (!modeObj || modeObj.mode === undefined) return;
-
-    const previousMode = this.vimMode;
-    this.vimMode = modeObj.mode;
-
-    if (this.vimMode === 'normal') {
-      this.matchHandler.setEnabled(true);
-    } else if (previousMode === 'normal') {
-      // Transitioned away from normal → disable hotkeys.
-      this.matchHandler.setEnabled(false);
-    }
-  };
-  // endregion
 
   public invokeCommand(commandID: string): void {
     if (commandID) {
