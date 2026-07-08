@@ -203,10 +203,14 @@ function resolveKeyToken(
   }
 
   let resolvedKey = resolveKeyName(token);
+  let shift = false;
   if (resolvedKey.length === 1 && /[A-Za-z]/.test(resolvedKey)) {
+    if (resolvedKey >= 'A' && resolvedKey <= 'Z') {
+      shift = true;
+    }
     resolvedKey = resolvedKey.toLowerCase();
   }
-  return new KeyPress(resolvedKey, false, false, false, false);
+  return new KeyPress(resolvedKey, shift, false, false, false);
 }
 
 function resolveMapLeader(rawValue: string): Optional<KeyPress> {
@@ -254,7 +258,7 @@ export function parseConfig(
             line: token.lineNumber,
             message: 'Invalid key sequence (unclosed angle bracket?)',
           });
-          writeConsole(`[parseConfig] Sequence ERROR: invalid key sequence`);
+          writeConsole('[parseConfig] Sequence ERROR: invalid key sequence');
           break;
         }
 
@@ -269,7 +273,7 @@ export function parseConfig(
                 line: token.lineNumber,
                 message: '<leader> used but mapleader is not set',
               });
-              writeConsole(`[parseConfig] Sequence ERROR: <leader> used but mapleader not set`);
+              writeConsole('[parseConfig] Sequence ERROR: <leader> used but mapleader not set');
             } else {
               errors.push({
                 line: token.lineNumber,

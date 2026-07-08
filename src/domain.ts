@@ -54,7 +54,11 @@ export class KeyPress implements Hashable {
     ctrl: boolean,
     meta: boolean,
   ) {
-    this.key = key;
+    let normalizedKey = key;
+    if (normalizedKey.length === 1 && /[A-Za-z]/.test(normalizedKey)) {
+      normalizedKey = normalizedKey.toLowerCase();
+    }
+    this.key = normalizedKey;
     this.shift = shift;
     this.alt = alt;
     this.ctrl = ctrl;
