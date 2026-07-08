@@ -1,61 +1,81 @@
 # Key Sequence
 
-Assign multi-key sequences to any Obsidian command, including those from other
-plugins.
+Assign multi-key sequences to any Obsidian command, configured via a vimrc-style file.
 
 ## How it works
 
-Instead of a single chord, you press a **sequence of keys** to trigger a
-command. For example, press <kbd>Ctrl</kbd>+<kbd>b</kbd> then
-<kbd>h</kbd> to focus the pane to the left.
+Instead of a single chord, you press a **sequence of keys** to trigger a command. For example, press <kbd>Space</kbd> then <kbd>h</kbd> to toggle left sidebar.
 
-No key sequences are pre-configured. You define your own.
+No key sequences are pre-configured. You define your own in the config file.
 
-## Vim mode
+## Configuration
 
-When Obsidian's Vim mode is active, key sequences are **disabled** in insert,
-visual, and replace modes — they only work from normal mode. This prevents
-key sequences from interfering with typing.
+Key sequences are defined in a config file using vimrc-style syntax.
+
+By default, the plugin looks for `.obsidian/key-sequence.vimrc` in your vault. You can change this path in the plugin settings.
+
+### Syntax
+
+```
+" comment
+let mapleader = "<key>"
+gmap <key-sequence> :<command-id><CR>
+```
+
+- Lines starting with `"` are comments.
+- `let mapleader` defines a leader key referenced by `<leader>` in sequences.
+  **Note:** This plugin has no Vim-style leader key. `<leader>` is simply a placeholder that gets substituted with the mapleader value. For example, `let mapleader = "<Space>"` means `<leader>h` behaves identically to writing `<Space>h`.
+- `gmap` maps a key sequence to an Obsidian command ID.
+
+### Examples
+
+```
+let mapleader = "<Space>"
+
+gmap <leader>e :editor:focus<CR>
+```
+
+## Settings
+
+Open Settings → **Key Sequence** to configure:
+
+- **Config file path** — Relative path from vault root. Defaults to `.obsidian/key-sequence.vimrc`. The file is auto-created with a template on first load if it doesn't exist.
+
+- **Embedded mode** — Merge key sequences into another plugin's config file (e.g. Obsidian-Vimrc-Support's `.obsidian.vimrc`). When enabled, only lines prefixed with the marker below are parsed.
+
+- **Line prefix marker** — Only visible when embedded mode is on. Defines the prefix that marks a line as a key sequence definition (default: `" ks>`).
+
+### Embedded mode example
+
+In your `.obsidian.vimrc`:
+
+```
+let mapleader = "<Space>"
+" ks> let mapleader = "<Space>"
+
+exmap file_explorer_reveal_active_file obcommand file-explorer:reveal-active-file
+nmap <leader>e :file_explorer_reveal_active_file<CR>
+
+" ks> gmap <leader>e :editor:focus<CR>
+```
 
 ## Usage
 
-### Adding a keymap
+1. Create your config file (or let the plugin auto-create it).
+2. Define your key sequences using the syntax above.
+3. Use the **Key Sequence: Reload config file** command to apply changes without restarting Obsidian.
 
-1. Open Settings → **Key Sequence**
-2. Click **New keymap**
-3. Select a command from the dropdown
-4. Press your key sequence (e.g. <kbd>Ctrl</kbd>+<kbd>b</kbd> then <kbd>h</kbd>)
-5. Press <kbd>Enter</kbd> to confirm each key, or
-   <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>Enter</kbd> to finish
-6. Click **Save**
-
-You can also open the recording modal from anywhere via the **Key Sequence:
-Open Register Modal** command in the command palette.
-
-### Managing keymaps
-
-Each configured keymap shows:
-
-- The key sequence on the left (click to re-record)
-- A command dropdown to change the target command
-- A delete button to remove the keymap
+Key sequences are disabled when an input, textarea, select, or contentEditable element is focused, so they won't interfere with typing.
 
 ## Installation
 
 ### Manual
 
-Copy `main.js`, `manifest.json`, and `styles.css` to
+Copy `main.js`, `manifest.json` to
 `<vault>/.obsidian/plugins/key-sequence-obsidian/`.
 
 ## Notes
 
-This plugin captures keydown events at the document level to match key
-sequences. Conflicts with other hotkeys are possible — if a sequence prefix
-matches another binding, the key sequence takes priority while a partial
-match is in progress.
+This plugin captures keydown events at the document level to match key sequences. Conflicts with other hotkeys are possible — if a sequence prefix matches another binding, the key sequence takes priority while a partial match is in progress.
 
-## Acknowledgments
-
-Vim mode integration adapted from
-[vim-im-select-obsidian](https://github.com/ALONELUR/vim-im-select-obsidian)
-by ALONELUR (MIT License).
+Debug logging is written to the console with the `Key Sequence:` prefix.
