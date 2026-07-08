@@ -1,4 +1,5 @@
 import { KeyPress, KeyMap, Optional } from './domain';
+import { writeConsole } from './utils';
 
 export interface ConfigError {
   line: number;
@@ -85,6 +86,7 @@ const KEYMAP_RE = /^\s*gmap\s+(\S+)\s+:(.+)<CR>$/;
 function lexLine(line: string, lineNumber: number): LineToken {
   const mapleaderMatch = line.match(MAPLEADER_RE);
   if (mapleaderMatch) {
+    writeConsole(`[lexLine] line ${lineNumber} => MapLeader: value="${mapleaderMatch[1]}"`);
     return {
       type: LineType.MapLeader,
       lineNumber,
@@ -95,6 +97,7 @@ function lexLine(line: string, lineNumber: number): LineToken {
 
   const keymapMatch = line.match(KEYMAP_RE);
   if (keymapMatch) {
+    writeConsole(`[lexLine] line ${lineNumber} => Sequence: keySequence="${keymapMatch[1]}", commandID="${keymapMatch[2]}"`);
     return {
       type: LineType.Sequence,
       lineNumber,
@@ -112,6 +115,7 @@ function lexLine(line: string, lineNumber: number): LineToken {
     return { type: LineType.Empty, lineNumber, raw: line };
   }
 
+  writeConsole(`[lexLine] line ${lineNumber} => Unknown`);
   return { type: LineType.Unknown, lineNumber, raw: line };
 }
 
@@ -234,19 +238,23 @@ export function parseConfig(
             line: token.lineNumber,
             message: `Invalid mapleader value: "${token.value}"`,
           });
+          writeConsole(`[parseConfig] MapLeader ERROR: invalid "${token.value}"`);
         } else {
           mapleader = resolved;
+          writeConsole(`[parseConfig] MapLeader set: "${token.value}" => ${resolved.text()}`);
         }
         break;
       }
 
       case LineType.Sequence: {
         const keyTokens = tokenizeKeySequence(token.keySequence);
+        writeConsole(`[parseConfig] Sequence line ${token.lineNumber}: rawSeq="${token.keySequence}" tokens=[${keyTokens.join(', ')}] mapleader=${mapleader ? mapleader.text() : 'null'}`);
         if (keyTokens.length === 0) {
           errors.push({
             line: token.lineNumber,
             message: 'Invalid key sequence (unclosed angle bracket?)',
           });
+          writeConsole(`[parseConfig] Sequence ERROR: invalid key sequence`);
           break;
         }
 
@@ -261,20 +269,25 @@ export function parseConfig(
                 line: token.lineNumber,
                 message: '<leader> used but mapleader is not set',
               });
+              writeConsole(`[parseConfig] Sequence ERROR: <leader> used but mapleader not set`);
             } else {
               errors.push({
                 line: token.lineNumber,
                 message: `Invalid key token: "${kt}"`,
               });
+              writeConsole(`[parseConfig] Sequence ERROR: invalid key token "${kt}"`);
             }
             hasError = true;
             break;
           }
+          writeConsole(`[parseConfig]   keyToken "${kt}" => KeyPress(${kp.text()})`);
           sequence.push(kp);
         }
 
         if (!hasError) {
-          keymaps.push(new KeyMap(token.commandID, sequence));
+          const km = new KeyMap(token.commandID, sequence);
+          writeConsole(`[parseConfig] => REGISTERED: ${km.text()}`);
+          keymaps.push(km);
         }
         break;
       }
@@ -284,10 +297,12 @@ export function parseConfig(
           line: token.lineNumber,
           message: `Unrecognized line: "${token.raw.trim()}"`,
         });
+        writeConsole(`[parseConfig] Unknown line: "${token.raw.trim()}"`);
         break;
     }
   }
 
+  writeConsole(`[parseConfig] DONE: ${keymaps.length} keymaps registered, ${errors.length} errors`);
   return { keymaps, errors };
 }
 // endregion

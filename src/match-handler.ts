@@ -1,5 +1,5 @@
 import { Optional, PressKind, StateMachine, KeyPress, KeyMap, Trie, TrieNode } from './domain';
-import { isInputFocused } from './utils';
+import { isInputFocused, writeConsole } from './utils';
 
 export interface CommandInvoker {
   invokeCommand(commandID: string): void;
@@ -84,11 +84,17 @@ class MatchMachine implements StateMachine<KeyPress, MatchState> {
         this.currentState = wasAlreadySearching
           ? MatchState.InvalidMatch
           : MatchState.EmptyMatch;
+        if (wasAlreadySearching) {
+          writeConsole(`[Matcher] seq BROKEN at key "${keypress.text()}"`);
+        }
         break;
       case MatchKind.PartialMatch:
         this.currentState = wasAlreadySearching
           ? MatchState.ImprovedMatch
           : MatchState.StartedMatch;
+        if (!wasAlreadySearching) {
+          writeConsole(`[Matcher] seq STARTED: "${keypress.text()}"`);
+        }
         break;
       case MatchKind.FullMatch:
         this.currentState = MatchState.SuccessMatch;
@@ -151,6 +157,10 @@ export class MatchHandler {
       return;
     }
 
+    if (this.machine.stateKind() === MatchStateKind.Flow) {
+      writeConsole(`[Matcher] keydown in-flow: key=${JSON.stringify(event.key)} ctrl=${event.ctrlKey} shift=${event.shiftKey} alt=${event.altKey} meta=${event.metaKey}`);
+    }
+
     const keypress = KeyPress.fromEvent(event);
     const machineState = this.machine.advance(keypress);
 
@@ -160,6 +170,9 @@ export class MatchHandler {
 
       if (machineState === MatchState.SuccessMatch) {
         const keymap = this.machine.fullMatch();
+        if (keymap) {
+          writeConsole(`[Matcher] FIRED: ${keymap.text()}`);
+        }
         this.emit(keymap);
       }
     }
@@ -178,5 +191,9 @@ export class MatchHandler {
   public setKeymap(keymaps: KeyMap[]): void {
     this.trie = Trie.from(keymaps);
     this.machine = new MatchMachine(this.trie);
+    writeConsole(`[Matcher] Trie built with ${keymaps.length} keymaps:`);
+    for (const km of keymaps) {
+      writeConsole(`[Matcher]   ${km.text()}`);
+    }
   }
 }

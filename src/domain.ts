@@ -111,9 +111,10 @@ export class KeyMap implements Iterable<KeyPress> {
 
   public text = (): string => {
     return (
+      '[' +
       this.commandID +
-      ' = ' +
-      this.sequence.map((press) => press.text()).join(' => ')
+      '] ' +
+      this.sequence.map((press) => press.text()).join('->')
     );
   };
 }
